@@ -1,7 +1,103 @@
-#
+# 
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "field:production,production_ancestors:"
-msgid "Production Ancestors"
-msgstr "Producciones principales"
+msgctxt "field:production,ancestors:"
+msgid "Ancestors"
+msgstr "Predecesores"
+
+msgctxt "field:production,ancestors_char:"
+msgid "Ancestors"
+msgstr "Predecesores"
+
+msgctxt "field:production,children:"
+msgid "Children"
+msgstr "Hijos"
+
+msgctxt "field:production,parents:"
+msgid "Parents"
+msgstr "Padres"
+
+msgctxt "field:production,parents_char:"
+msgid "Parents"
+msgstr "Padres"
+
+msgctxt "field:production,successors:"
+msgid "Successors"
+msgstr "Sucesores"
+
+msgctxt "field:production.ancestor_successor,ancestor:"
+msgid "Ancestor"
+msgstr "Predecesor"
+
+msgctxt "field:production.ancestor_successor,create_date:"
+msgid "Create Date"
+msgstr "Fecha de creación"
+
+msgctxt "field:production.ancestor_successor,create_uid:"
+msgid "Create User"
+msgstr "Usuario de creación"
+
+msgctxt "field:production.ancestor_successor,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:production.ancestor_successor,rec_name:"
+msgid "Name"
+msgstr "Nombre"
+
+msgctxt "field:production.ancestor_successor,successor:"
+msgid "Successor"
+msgstr "Sucesores"
+
+msgctxt "field:production.ancestor_successor,write_date:"
+msgid "Write Date"
+msgstr "Fecha modificación"
+
+msgctxt "field:production.ancestor_successor,write_uid:"
+msgid "Write User"
+msgstr "Usuario modificación"
+
+msgctxt "field:production.parent_child,child:"
+msgid "Child"
+msgstr "Hijo"
+
+msgctxt "field:production.parent_child,create_date:"
+msgid "Create Date"
+msgstr "Fecha de creación"
+
+msgctxt "field:production.parent_child,create_uid:"
+msgid "Create User"
+msgstr "Usuario de creación"
+
+msgctxt "field:production.parent_child,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:production.parent_child,parent:"
+msgid "Parent"
+msgstr "Padre"
+
+msgctxt "field:production.parent_child,rec_name:"
+msgid "Name"
+msgstr "Nombre"
+
+msgctxt "field:production.parent_child,write_date:"
+msgid "Write Date"
+msgstr "Fecha modificación"
+
+msgctxt "field:production.parent_child,write_uid:"
+msgid "Write User"
+msgstr "Usuario modificación"
+
+msgctxt "model:production.ancestor_successor,name:"
+msgid "Production Ancestor Successor"
+msgstr "Producción predecesor sucesor"
+
+msgctxt "model:production.parent_child,name:"
+msgid "Production Parents Children"
+msgstr "Producción padres hijos"
+
+msgctxt "view:production:"
+msgid "Ancestors / Successors"
+msgstr "Predecesores / sucesores"
