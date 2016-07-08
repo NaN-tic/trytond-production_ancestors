@@ -11,63 +11,76 @@ class Reservation:
 
     @classmethod
     def generate_reservations(cls, clean=True):
-        '''Find and relate ancestors and parents when source/destination
-        reservations are productions'''
-        Production = Pool().get('production')
+        pool = Pool()
+        Production = pool.get('production')
+        ParentChild = pool.get('production.parent_child')
+        AncestorSuccessor = pool.get('production.ancestor_successor')
 
         reservations = super(Reservation, cls).generate_reservations(clean)
 
-        if not reservations:
-            return reservations
+        # Clear all relationships
+        ParentChild.delete(ParentChild.search([]))
+        AncestorSuccessor.delete(AncestorSuccessor.search([]))
 
-        def __get_recursive_productions(productions, parents_update, child_update):
-            for reservation in cls.search([
-                    ('destination_document', 'in', productions),
-                    ]):
-                source = reservation.source_document
-                if source and source.__name__ == 'production':
-                    destination = reservation.destination_document
-                    parents_update.setdefault(source, set()).add(destination)
-                    child_update.setdefault(destination, set()).add(source)
+        ancestors = set(Production.search([
+                ('state', 'not in', ['cancel', 'done']),
+                ]))
 
-                    parents_update, child_update = __get_recursive_productions(
-                        [source], parents_update, child_update)
-
-            return parents_update, child_update
-
-        sources = set()
-        destinations = set()
-        productions = set()
-        for reservation in reservations:
+        # If clean was set to False, then 'reservations' variable will not
+        # contain all the records so we must search() here.
+        for reservation in cls.search([]):
             source = reservation.source_document
+            if not source or not source.__name__ == 'production':
+                continue
             destination = reservation.destination_document
-            if (source and source.__name__ == 'production'):
-                sources.add(source)
-                productions.add(source)
-            if (destination and destination.__name__ == 'production'):
-                destinations.add(destination)
-                productions.add(destination)
-        
+            if (destination and destination.__name__ == 'production'
+                    and source in ancestors):
+                ancestors.remove(source)
+
         parents_update = {}
-        child_update = {}
-        for production in productions:
-            parents_update[production] = set()
-            child_update[production] = set()
+        ancestors_update = {}
+        ancestors = [x.id for x in ancestors]
+        for ancestor in ancestors:
+            parents_update[ancestor] = set([ancestor])
+            ancestors_update[ancestor] = set([ancestor])
 
-        # call recursive from main production to last childreen production
-        parents_update, child_update = __get_recursive_productions(
-            list(destinations - sources), parents_update, child_update)
+        parents = ancestors
+        processed = set()
+        exit = False
+        while not exit:
+            exit = True
+            # Discard already processed productions to try to avoid rare
+            # infinite loops
+            pending = set(parents) - processed
+            processed |= set(parents)
+            children = []
+            for reservation in cls.search([
+                        ('destination_document', 'in',
+                            ['production,%d' % x for x in pending]),
+                        ]):
+                source = reservation.source_document
+                destination = reservation.destination_document
+                if source and source.__name__ == 'production':
+                    exit = False
+                    destination = reservation.destination_document
+                    if not source.id in parents_update:
+                        parents_update[source.id] = set()
+                        ancestors_update[source.id] = set()
+                    parents_update[source.id].add(destination.id)
+                    ancestors_update[source.id] |= ancestors_update[
+                        destination.id]
+                    children.append(source.id)
+            parents = children
 
-        to_write = []
-        for k, v in parents_update.iteritems():
-            to_write.extend(([k], {
-                'production_parents': [('add', [p.id for p in v])],
-                }))
-        for k, v in child_update.iteritems():
-            to_write.extend(([k], {
-                'production_childrens': [('add', [p.id for p in v])],
-                }))
-        if to_write:
-            Production.write(*to_write)
-
+        if parents_update:
+            to_update = []
+            for production_id in parents_update.keys():
+                to_update.append([Production(production_id)])
+                parents = list(parents_update[production_id])
+                ancestors = list(ancestors_update[production_id])
+                to_update.append({
+                        'parents': [('add', parents)],
+                        'ancestors': [('add', ancestors)],
+                        })
+            Production.write(*to_update)
         return reservations

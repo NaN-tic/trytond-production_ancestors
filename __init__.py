@@ -8,7 +8,7 @@ from .stock import *
 def register():
     Pool.register(
         Production,
-        ProductionParent,
-        ProductionChild,
+        ProductionParentChild,
+        ProductionAncestorSuccessor,
         Reservation,
         module='production_ancestors', type_='model')

@@ -3,28 +3,33 @@
 from trytond.model import ModelSQL, fields
 from trytond.pool import PoolMeta
 
-__all__ = ['Production', 'ProductionParent', 'ProductionChild']
+__all__ = ['Production', 'ProductionParentChild', 'ProductionAncestorSuccessor']
 
 
 class Production:
     __name__ = 'production'
     __metaclass__ = PoolMeta
-    # production_parents = fields.Char('Production Parents', readonly=True)
-    # production_childrens = fields.Char('Production Childrens', readonly=True)
-    production_parents = fields.Many2Many('production.parent',
-        'production', 'parent', 'Parents', readonly=True)
-    production_childrens = fields.Many2Many('production.child',
-        'production', 'child', 'Childrens', readonly=True)
-    production_parents_char = fields.Function(fields.Char('Parents'),
-        'get_production_parents')
-    production_childrens_char = fields.Function(fields.Char('Childens'),
-        'get_production_children')
+    parents = fields.Many2Many('production.parent_child', 'child', 'parent',
+        'Parents', readonly=True)
+    children = fields.Many2Many('production.parent_child', 'parent', 'child',
+        'Children', readonly=True)
+    ancestors = fields.Many2Many('production.ancestor_successor', 'successor',
+        'ancestor', 'Ancestors', readonly=True)
+    successors = fields.Many2Many('production.ancestor_successor', 'ancestor',
+        'successor', 'Successors', readonly=True)
+    parents_char = fields.Function(fields.Char('Parents'), 'get_chars',
+        searcher='search_chars')
+    ancestors_char = fields.Function(fields.Char('Ancestors'), 'get_chars',
+        searcher='search_chars')
 
-    def get_production_parents(self, name):
-        return ', '.join([p.code for p in self.production_parents])
-
-    def get_production_children(self, name):
-        return ', '.join([p.code for p in self.production_childrens])
+    def get_chars(self, name):
+        name = name.split('_')[0]
+        return ', '.join([p.code for p in getattr(self, name)])
+    
+    @classmethod
+    def search_chars(cls, name, clause):
+        name = name.split('_')[0]
+        return [(name + '.rec_name',) + tuple(clause)[1:]]
 
     @classmethod
     def copy(cls, productions, default=None):
@@ -32,23 +37,23 @@ class Production:
             default = {}
         default = default.copy()
         default['production_parents'] = None
-        default['production_childrens'] = None
+        default['production_children'] = None
+        default['production_ancestors'] = None
+        default['production_successors'] = None
         return super(Production, cls).copy(productions, default=default)
 
 
-class ProductionParent(ModelSQL):
-    'Production - Parent'
-    __name__ = 'production.parent'
-    production = fields.Many2One('production', 'Production', ondelete='CASCADE',
-        required=True, select=True)
+class ProductionParentChild(ModelSQL):
+    'Production Parents Children'
+    __name__ = 'production.parent_child'
     parent = fields.Many2One('production', 'Parent', ondelete='CASCADE',
-        required=True, select=True)
-
-
-class ProductionChild(ModelSQL):
-    'Production - Child'
-    __name__ = 'production.child'
-    production = fields.Many2One('production', 'Production', ondelete='CASCADE',
-        required=True, select=True)
+        required=True)
     child = fields.Many2One('production', 'Child', ondelete='CASCADE',
-        required=True, select=True)
+        required=True)
+
+
+class ProductionAncestorSuccessor(ModelSQL):
+    'Production Ancestor Successor'
+    __name__ = 'production.ancestor_successor'
+    ancestor = fields.Many2One('production', 'Ancestor', ondelete='CASCADE')
+    successor = fields.Many2One('production', 'Successor', ondelete='CASCADE')

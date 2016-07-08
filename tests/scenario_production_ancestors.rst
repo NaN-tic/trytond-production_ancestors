@@ -201,23 +201,37 @@ Create Stock Reservations::
     >>> create_reservations.execute('create_')
     >>> productions = Production.find([])
     >>> prod1, prod2, prod3, prod4, prod5 = productions
-    >>> len(prod1.production_parents)
-    0
-    >>> len(prod1.production_childrens)
+    >>> len(prod1.parents)
+    1
+    >>> prod1.parents == [prod1]
+    True
+    >>> len(prod1.children)
+    3
+    >>> prod1.children == [prod1, prod2, prod3]
+    True
+    >>> len(prod2.parents)
+    1
+    >>> prod2.parents == [prod1]
+    True
+    >>> len(prod3.parents)
+    1
+    >>> prod3.parents == [prod1]
+    True
+    >>> len(prod2.children)
     2
-    >>> len(prod2.production_parents)
-    1
-    >>> len(prod2.production_childrens)
-    2
-    >>> len(prod3.production_parents)
-    1
-    >>> len(prod3.production_childrens)
+    >>> prod2.children == [prod4, prod5]
+    True
+    >>> len(prod3.children)
     0
-    >>> len(prod4.production_parents)
+    >>> len(prod4.parents)
     1
-    >>> len(prod4.production_childrens)
+    >>> prod4.parents == [prod2]
+    True
+    >>> len(prod4.children)
     0
-    >>> len(prod5.production_parents)
+    >>> len(prod5.parents)
     1
-    >>> len(prod5.production_childrens)
+    >>> prod5.parents == [prod2]
+    True
+    >>> len(prod5.children)
     0

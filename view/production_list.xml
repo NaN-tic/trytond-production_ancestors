@@ -3,9 +3,7 @@
 this repository contains the full copyright notices and license terms. -->
 <data>
     <xpath expr="/tree/field[@name='state']" position="after">
-        <field name="production_parents_char"/>
-        <field name="production_childrens_char"/>
-        <field name="production_parents" tree_invisible="1"/>
-        <field name="production_childrens" tree_invisible="1"/>
+        <field name="parents_char"/>
+        <field name="ancestors_char"/>
     </xpath>
 </data>
