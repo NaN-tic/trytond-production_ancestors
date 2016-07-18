@@ -24,7 +24,7 @@ class Production:
 
     def get_chars(self, name):
         name = name.split('_')[0]
-        return ', '.join([p.code for p in getattr(self, name)])
+        return ', '.join([p.number for p in getattr(self, name)])
     
     @classmethod
     def search_chars(cls, name, clause):
