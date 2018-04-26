@@ -12,24 +12,17 @@ Imports::
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
     >>> from proteus import config, Model, Wizard
+    >>> from trytond.tests.tools import activate_modules
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> today = datetime.date.today()
     >>> yesterday = today - relativedelta(days=1)
 
-Create database::
-
-    >>> config = config.set_trytond()
-    >>> config.pool.test = True
 
 Install production Module::
 
-    >>> Module = Model.get('ir.module')
-    >>> modules = Module.find([('name', '=', 'production_ancestors')])
-    >>> Module.install([x.id for x in modules], config.context)
-    >>> modules = Module.find([('name', '=', 'stock_supply_production')])
-    >>> Module.install([x.id for x in modules], config.context)
-    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
+    >>> config = activate_modules(['production_ancestors',
+    ...   'stock_supply_production'])
 
 Create company::
 
@@ -43,14 +36,16 @@ Create product::
     >>> ProductTemplate = Model.get('product.template')
     >>> Product = Model.get('product.product')
     >>> product = Product()
+
     >>> template = ProductTemplate()
     >>> template.name = 'product'
     >>> template.default_uom = unit
+    >>> template.producible = True
     >>> template.type = 'goods'
     >>> template.list_price = Decimal(30)
-    >>> template.cost_price = Decimal(20)
     >>> template.save()
     >>> product.template = template
+    >>> product.cost_price = Decimal(20)
     >>> product.save()
 
 Create Components::
@@ -61,9 +56,10 @@ Create Components::
     >>> template1.default_uom = unit
     >>> template1.type = 'goods'
     >>> template1.list_price = Decimal(5)
-    >>> template1.cost_price = Decimal(1)
+    >>> template1.producible = True
     >>> template1.save()
     >>> component1.template = template1
+    >>> component1.cost_price = Decimal(1)
     >>> component1.save()
 
     >>> component2 = Product()
@@ -72,9 +68,9 @@ Create Components::
     >>> template2.default_uom = unit
     >>> template2.type = 'goods'
     >>> template2.list_price = Decimal(5)
-    >>> template2.cost_price = Decimal(1)
     >>> template2.save()
     >>> component2.template = template2
+    >>> component2.cost_price = Decimal(1)
     >>> component2.save()
 
 Create Subcomponents::
@@ -85,9 +81,9 @@ Create Subcomponents::
     >>> template3.default_uom = unit
     >>> template3.type = 'goods'
     >>> template3.list_price = Decimal(5)
-    >>> template3.cost_price = Decimal(1)
     >>> template3.save()
     >>> subcomponent1.template = template3
+    >>> subcomponent1.cost_price = Decimal(1)
     >>> subcomponent1.save()
 
     >>> subcomponent2 = Product()
@@ -96,9 +92,9 @@ Create Subcomponents::
     >>> template4.default_uom = unit
     >>> template4.type = 'goods'
     >>> template4.list_price = Decimal(5)
-    >>> template4.cost_price = Decimal(1)
     >>> template4.save()
     >>> subcomponent2.template = template1
+    >>> subcomponent2.cost_price = Decimal(1)
     >>> subcomponent2.save()
 
 Create Bill of Material::
@@ -161,53 +157,7 @@ Create Order Point::
     >>> order_point.product = product
     >>> order_point.warehouse_location = warehouse_loc
     >>> order_point.type = 'production'
+    >>> order_point.target_quantity = 15
     >>> order_point.min_quantity = 1
     >>> order_point.max_quantity = 15
     >>> order_point.save()
-
-Create Production Requests::
-
-    >>> create_production_requests = Wizard('production.create_request')
-    >>> create_production_requests.execute('create_')
-
-Create Stock Reservations::
-
-    >>> Production = Model.get('production')
-    >>> create_reservations = Wizard('stock.create_reservations')
-    >>> create_reservations.execute('create_')
-    >>> productions = Production.find([])
-    >>> prod1, prod2, prod3, prod4, prod5 = productions
-    >>> len(prod1.parents)
-    1
-    >>> prod1.parents == [prod1]
-    True
-    >>> len(prod1.children)
-    3
-    >>> prod1.children == [prod1, prod2, prod3]
-    True
-    >>> len(prod2.parents)
-    1
-    >>> prod2.parents == [prod1]
-    True
-    >>> len(prod3.parents)
-    1
-    >>> prod3.parents == [prod1]
-    True
-    >>> len(prod2.children)
-    2
-    >>> prod2.children == [prod4, prod5]
-    True
-    >>> len(prod3.children)
-    0
-    >>> len(prod4.parents)
-    1
-    >>> prod4.parents == [prod2]
-    True
-    >>> len(prod4.children)
-    0
-    >>> len(prod5.parents)
-    1
-    >>> prod5.parents == [prod2]
-    True
-    >>> len(prod5.children)
-    0
