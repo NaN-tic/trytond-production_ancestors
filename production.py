@@ -6,9 +6,8 @@ from trytond.pool import PoolMeta
 __all__ = ['Production', 'ProductionParentChild', 'ProductionAncestorSuccessor']
 
 
-class Production:
+class Production(metaclass=PoolMeta):
     __name__ = 'production'
-    __metaclass__ = PoolMeta
     parents = fields.Many2Many('production.parent_child', 'child', 'parent',
         'Parents', readonly=True)
     children = fields.Many2Many('production.parent_child', 'parent', 'child',
@@ -25,7 +24,7 @@ class Production:
     def get_chars(self, name):
         name = name.split('_')[0]
         return ', '.join([p.number for p in getattr(self, name)])
-    
+
     @classmethod
     def search_chars(cls, name, clause):
         name = name.split('_')[0]
